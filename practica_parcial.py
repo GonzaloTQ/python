@@ -966,13 +966,244 @@ def stock_productos(stock_cambios: list[(str, int)]) -> dict[str,(int, int)]:
     return extremos
 
 sc1 = [("galletita", 12),("galletita", 10),("galletita", 1),("hueso",120),("hueso",3),("hueso",10)] #{"galletita":(1,12), "hueso":(3,120)}
-print(stock_productos(sc1))
+#print(stock_productos(sc1))
 sc2 = [("pato", 12),("pato",0),("pato",13),("collar",300),("collar",20),("collar",17),("comida",100),("comida",29)]
 #{"pato":(0,13), "collar":(17,300), "comida": (29,100)}
-print(stock_productos(sc2))
+#print(stock_productos(sc2))
 sc3 = [("correa", 10),("comida",140),("comida",49),("shampoo",2),("shampoo",39),("shampoo",50)]
 #{"correa": (10,10), "comida":(49,140), "shampoo": (2,50)}
-print(stock_productos(sc3)) 
+#print(stock_productos(sc3)) 
 
 
-#fsasczc 
+# 3) Matriz de responsables por turnos [2 puntos]
+
+# Las personas responsables de los turnos están anotadas en una matriz donde las columnas representan los
+# días, en orden de lunes a domingo, y cada fila a un rango de una hora. Hay cuatro filas para los turnos 
+# de la mañana (9, 10, 11 y 12 hs) y otras cuatro para la tarde (14, 15, 16 y 17).
+
+# Para hacer más eficiente el trabajo del personal de la veterinaria, se necesita analizar si quienes 
+# quedan de responsables, están asignadas de manera continuada en los turnos de cada día.
+
+# Para ello se pide desarrollar una función en Python que, dada la matriz de turnos, devuelva una lista
+# de tuplas de Bool, una por cada día. Cada tupla debe contener dos elementos. El primer elemento debe ser
+# True sí y solo sí todos los valores de los turnos de la mañana para ese día son iguales entre sí. El 
+# segundo elemento debe ser True sí y solo sí todos los valores de los turnos de la tarde para ese día 
+# son iguales entre sí. Siempre hay una persona responsable en cualquier horario de la veterinaria.
+
+# problema un_responsable_por_turno(in grilla_horaria: seq<seq<String>>): seq<(Bool x Bool)> {
+# requiere: {|grilla_horaria| = 8}
+# requiere: {Todos los elementos de grilla_horaria tienen el mismo tamaño (mayor a 0 y menor a 8)}
+# requiere: {No hay cadenas vacías en las listas de grilla_horaria}
+# asegura: {|res| = |grilla_horaria[0]|}
+# asegura: {El primer valor de la tupla en res[i], con i:Z, 0 <= i < |res| es igual a True <==> los primeros
+# 4 valores de la columna i de grilla_horaria son iguales entre sí}
+# asegura: {El segundo valor de la tupla en res[i], con i:Z, 0 <= i < |res| es igual a True <==> los últimos
+# 4 valores de la columna i de grilla_horaria son iguales entre sí}
+# }
+
+def un_responsable_por_turno(grilla_horaria: list[list[str]]) -> list[(bool, bool)]:
+    indice: int = 0
+    indice_aux: int = 0
+    mitad: int = int(len(grilla_horaria)/2)
+    res_mitad_uno: list[str] = []
+    res_mitad_dos: list[str] = []
+    lista_bool: list[(bool, bool)] = []
+    res = str
+
+    # quiero ver la primera mitad de la matriz
+    while indice_aux < len(grilla_horaria[0]): # indice_aux me ayuda a recorrer la primer lista de grilla_horaria
+        persona = grilla_horaria[0][indice_aux] # como las personas deben ser en todas las filas iguales, tomo las de la primer lista (*1)
+        while indice < mitad: # como siempre |grilla_horaria| = 8, el limite de indice es 3 (no puede llegar a mitad = 4) (*2)
+            if persona == grilla_horaria[indice][indice_aux]: # busco la persona en el mismo indice_aux pero en la siguiente lista (*3)
+                res = True
+                indice += 1
+            else:
+                res = False
+                indice = mitad # como el res = false debe terminar la iteracion, entonces hago que el indice sea la mitad, ya que (*2)
+        res_mitad_uno.append(res) # agrego el resultado a la lista de la primer mitad, en la posicion de indice_aux
+        indice_aux += 1 # para ver el elemento siguiente de grilla_horaria
+        indice = 0 # restauro el indice
+    
+    #quiero ver la segunda mitad de la matriz
+    indice_aux = 0 # restauro el indice aux
+    indice = mitad # ahora empiezo a ver desde la 4 lista
+    while indice_aux < len(grilla_horaria[0]):
+        persona = grilla_horaria[4][indice_aux] # (*1)
+        while indice < len(grilla_horaria): # ahora tomo valores desde el 4 hasta el 7 inclusive (el indice no puede ser 8)
+            if persona == grilla_horaria[indice][indice_aux]: # (*3)
+                res = True
+                indice +=1
+            else:
+                res = False
+                indice = len(grilla_horaria) # como el res = false debe terminar la iteracion
+        res_mitad_dos.append(res) # agrego el resultado a la lista de la segunda mitad, en la posicion de indice_aux
+        indice_aux += 1 # para ver el elemento siguiente de grilla_horaria
+        indice = mitad # restauro el indice
+
+    for i in range(len(res_mitad_uno)): # |res_mitad_uno| = |res_mitad_dos| entonces tomo cualquiera para el range
+        # evaluo los posibles resultados de ambas listas, siempre en el mismo indice
+        if res_mitad_uno[i] and res_mitad_dos[i]:
+            lista_bool.append((True, True))
+        elif res_mitad_uno[i] == False and res_mitad_dos[i] == False:
+            lista_bool.append((False, False))
+        elif res_mitad_uno[i] and res_mitad_dos[i] == False:
+            lista_bool.append((True, False))
+        elif res_mitad_uno[i] == False and res_mitad_dos[i]:
+            lista_bool.append((False, True))
+
+    return lista_bool
+
+g1 = [["ana", "julio", "res", "bool"],
+    ["ana", "julio", "res", "bool"],
+    ["ana", "julio", "res", "bool"],
+    ["ana", "julio", "res", "bool"],
+    ["luki", "po", "kitty", "pika"],
+    ["luki", "po", "kitty", "pika"],
+    ["luki", "po", "kitty", "pika"],
+    ["luki", "po", "kitty", "pika"]]
+#print(un_responsable_por_turno(g1))
+g2 = [["ana", "julio", "res", "bool"],
+    ["ana", "julio", "res", "bool"],
+    ["ana", "julio", "res", "bool"],
+    ["ana", "res", "julio", "bool"],
+    ["luki", "po", "kitty", "pika"],
+    ["luki", "po", "kitty", "pika"],
+    ["luki", "po", "kitty", "pika"],
+    ["luki", "po", "pika", "kitty"]]
+#print(un_responsable_por_turno(g2))
+g3 = [["ana", "julio", "res", "bool"],
+    ["ana", "julio", "res", "bool"],
+    ["ana", "res", "res", "bool"],
+    ["ana", "julio", "julio", "bool"],
+    ["luki", "po", "kitty", "pika"],
+    ["luki", "po", "kitty", "pika"],
+    ["luki", "po", "pika", "pika"],
+    ["luki", "po", "kitty", "kitty"]]
+#print(un_responsable_por_turno(g3))
+g4 = [["ana", "julio", "res"],
+    ["ana", "julio", "res"],
+    ["ana", "res", "res"],
+    ["ana", "julio", "julio"], #TFF
+    ["luki", "po", "kitty"],
+    ["luki", "po", "kitty"],
+    ["luki", "po", "pika"],
+["luki", "po", "kitty"]] #TTF
+#print(un_responsable_por_turno(g4))
+g5 = [["ana", "julio"],
+["ana", "julio"],
+["ana", "res"],
+["ana", "julio"], #TF
+    ["luki", "po"],
+["luki", "po"],
+    ["luki", "po"],
+    ["luki", "po"]] #TT
+#print(un_responsable_por_turno(g5))
+g6 = [["ana", "julio"],
+    ["ana", "julio"],
+    ["ana", "julio"],
+    ["ana", "julio"], #TT
+    ["luki", "po"],
+    ["luki", "po"],
+    ["luki", "po"],
+    ["luki", "po"]] #TT
+#print(un_responsable_por_turno(g6))
+
+# 4) Subsecuencia más larga [2 puntos]
+
+# Con el objetivo de organizar el flujo de pacientes, en la veterinaria se anotan los tipos de mascotas
+# que van ingresando al local. Se necesita identificar las consultas que involucran solo a perros y gatos.
+# Por eso, se decide desarrollar una función en Python que encuentre la secuencia más larga de consultas
+# consecutivas que solo contenga los tipos de mascota "perro" o "gato".
+
+# Se pide implementar una función que, dada una secuencia de Strings, que representan los tipos de animales
+# atendidos, devuelva el índice donde comienza la subsecuencia más larga que cumpla con estas condiciones.
+
+# problema subsecuencia_mas_larga(in tipos_pacientes_atendidos: seq<String>): Z{
+# requiere: {tipos_pacientes_atendidos tiene, por lo menos, un elemento "perro" o "gato"}
+# asegura: {res es el índice donde empieza la subsecuencia más larga de tipos_pacientes_atendidos que
+# contenga solo elementos "perro" o "gato"}
+# asegura: {Si hay más de una subsecuencia de tamaño máximo, res tiene el índice de la primera}
+# }
+
+def primer_numero_secuencia_mas_larga(lista: list[int]) -> int:
+    longitud_actual: int = 0
+    max_longitud: int = 0
+    primer_numero = int
+
+    for i in range(len(lista)):
+        if i + 1 < len(lista) and lista[i] + 1 == lista[i + 1]: # si lista[i] + 1 == lista[i + 1] quiere decir que son consecutivos
+            if longitud_actual == 0:
+                primer_numero = lista[i] # guardo el primer numero
+            longitud_actual += 1
+        else:
+            if longitud_actual > max_longitud:
+                max_longitud = longitud_actual
+            longitud_actual = 0 # reincio la longitud
+    return primer_numero # me devuelve el primer numero guardado de la lista con mayor longitud
+
+def subsecuencia_mas_larga(tipos_pacientes_atendidos: list[str]) -> int:
+    lista_indices: list[int] = []
+    indice_res = int
+
+    for i in range(len(tipos_pacientes_atendidos)): # recorro cada posicion de la lista tipos_pacientes_atendidos
+        if tipos_pacientes_atendidos[i] == "perro" or tipos_pacientes_atendidos[i] == "gato":
+            lista_indices.append(i) # si la lista en esa posicion es "perro" o "gato", guardo en una lista esos indices
+    indice_res = primer_numero_secuencia_mas_larga(lista_indices)
+    return indice_res
+
+tpa1 = ["pato","perro","gato","perro","leon","perro"] #1
+#print(subsecuencia_mas_larga(tpa1))
+tpa2 = ["pato","perro","gato","perro","leon","perro","perro","gato","perro"] # 5
+#print(subsecuencia_mas_larga(tpa2))
+
+print("FIN PARCIAL 5, ABAJO COMIENZA EL 6")
+
+def pertenece (elem:str, coleccion:dict) -> bool:
+    claves: list[str] = coleccion.keys()
+    for i in claves:
+        if i == elem:
+            return True
+    return False 
+
+def gestion_notas (notas_estudiante_materia:list[tuple[str,str,int]]) -> dict[str, list[tuple[str,int]]]:
+    res : dict[str, list[tuple[str,int]]] = {}
+    copia = notas_estudiante_materia
+    for n,e,m in copia:
+        nota:tuple[str,int] = (e,m)
+        if not pertenece (n,res):
+            res[n]=[nota]
+        else:
+            lista:list[tuple[str,int]] = res[n]
+            lista.append(nota)
+        
+    return res
+
+
+
+#print(gestion_notas([('juan', 'jabon', 30), ('mario', 'detergente', 15),('juan', 'shampoo', 27)]))
+
+
+
+
+
+def cantidad_digitos_pares(numeros: list[int]) -> int:
+    copia: list[int] = numeros.copy()
+    copia = separar_en_digitos(copia)
+    contador: int = 0
+    for num in copia:
+        if num % 2 == 0:
+            contador += 1
+    return contador
+
+def separar_en_digitos(numeros: list[int]) -> list[int]:
+    copia: list[str] = []
+    res: list[int] = []
+    for num in numeros:
+        copia.append(str(num))
+    for c in copia:
+        for digito in c:
+            res.append(int(digito))
+    return res 
+
+
+print(cantidad_digitos_pares([1234,34,333333333,2]))
