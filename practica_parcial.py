@@ -1206,4 +1206,74 @@ def separar_en_digitos(numeros: list[int]) -> list[int]:
     return res 
 
 
-print(cantidad_digitos_pares([1234,34,333333333,2]))
+#print(cantidad_digitos_pares([1234,34,333333333,2]))
+
+# Ejercicio 3
+def reordenar_cola_primero_numerosas(carpetas: Cola[tuple[str,int]], umbral:int) -> Cola[tuple[str,int]]:
+    copia: Cola[tuple[str,int]] = copiar_cola(carpetas)
+    lista: list[tuple[str,int]] = []
+    colamenores = Cola()
+    colamayores = Cola()
+    res: Cola[tuple[str,int]] = Cola()
+    while not(copia.empty()):
+        lista.append(copia.get())
+    for i in range (len(lista)):
+        if lista[i][1] <= umbral:
+            colamenores.put(lista[i])
+        elif lista[i][1] > umbral:
+            colamayores.put(lista[i])
+    while not(colamayores.empty()):
+        res.put(colamayores.get())
+    while not(colamenores.empty()):
+        res.put(colamenores.get())
+    return res 
+
+def copia_cola(carpetas: Cola[tuple[str,int]]) -> Cola[tuple[str,int]]:
+    res: Cola[tuple[str,int]] = Cola()
+    copia: Cola[tuple[str,int]] = carpetas
+    while not(copia.empty()):
+        elem = copia.get()
+        res.put(elem)
+    while not(res.empty()):
+        elem = res.get()
+        copia.put(elem)
+    return copia
+
+# Ejercicio 4
+def maximo(columna: list[int]) -> int:
+    res: int = 0
+    for n in columna:
+        if n > res:
+            res = n
+    return res 
+
+def obtener_columna(matriz: list[list[int]], columna: int) -> list[int]:
+    res: list[int] = []
+    for f in matriz:
+        res.append(f[columna])
+    return res
+
+def obtener_columnas(matriz: list[list[int]]) -> list[list[int]]:
+    columnas: list[list[int]] = []
+    for f in range(len(matriz)):
+        columna: list[int] = obtener_columna(matriz, f)
+        columnas.append(columna)
+    return columnas
+
+def matriz_cuasi_decreciente(matriz: list[list[int]]) -> bool:
+    res: bool = True 
+    columnas: list[list[int]] = obtener_columnas(matriz)
+    maximo_columna_i: int = maximo(columnas[0])
+    col_actual: int = 1
+
+    while (res and col_actual < len(columnas)):
+        maximo_col_i_mas_1: int = maximo(columnas[col_actual])
+        res = (maximo_columna_i > maximo_col_i_mas_1)
+        col_actual += 1
+        maximo_columna_i = maximo_col_i_mas_1
+
+    return res
+
+a = [[1,2,3],[4,3,2],[5,4,2]]
+print(matriz_cuasi_decreciente(a))
+print(a)
