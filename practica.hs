@@ -92,6 +92,13 @@ proximoPresidenteAux ((c1,v1):(c2,v2):xs) formulas votos | votosCandidato1 >= vo
 
 --Funciones utiles
 
+--maximo
+maximo :: [Integer] -> Integer
+maximo [x] = x
+maximo (x:xs)
+    | x > maximo xs = x
+    | otherwise = maximo xs
+
 -- inverso de lista
 reverso :: [t] -> [t]
 reverso [] = []
@@ -160,4 +167,93 @@ cuantosIguales (x:xs) (y:ys) | x == y = 1 + cuantosIguales (quitarTodos x xs) ys
                         | otherwise = cuantosIguales xs (y:ys)
 
 
+letrasIguales :: [Char] -> Int
+letrasIguales [] = 0 
+letrasIguales (' ':xs) =  letrasIguales xs --ignoro los espacios
+letrasIguales (x:xs)  | pertenece x xs = 1 + letrasIguales (quitarTodos x xs)
+                      | otherwise = letrasIguales xs
 
+
+
+{--1) Goles de no goleadores [1 punto]
+
+problema golesDeNoGoleadores (goleadoresPorEquipo: seq⟨String x String⟩, goles: seq⟨Z⟩, totalGolesTorneo: Z ): Z {
+    requiere: {equiposValidos(goleadoresPorEquipo)}
+    requiere: {|goleadoresPorEquipo| = |goles|}
+    requiere: {Todos los elementos de goles son mayores o iguales a 0}
+    requiere: {La suma de todos los elementos de goles es menor o igual a totalGolesTorneo}
+    asegura: {res es la cantidad de goles convertidos en el torneo por jugadores que no son los goleadores de sus equipos}
+}
+--}
+
+golesDeNoGoleadores :: [(String,String)] -> [Integer] -> Integer -> Integer
+golesDeNoGoleadores _ golesDeGoleadores totalGoles = totalGoles - contarGoles golesDeGoleadores
+
+contarGoles :: [Integer] -> Integer
+contarGoles [] = 0
+contarGoles (x:xs) = x + contarGoles xs
+
+{--2) Equipos Válidos [3 puntos]
+
+problema equiposValidos (goleadoresPorEquipo: seq⟨String x String⟩): Bool{
+    requiere: {True}
+    asegura: {(res = True) <-> goleadoresPorEquipo no contiene nombres de clubes repetidos, ni goleadores repetidos, ni jugadores con nombre de club}
+}
+--}
+
+equiposValidos :: [(String, String)] -> Bool
+equiposValidos [] = True
+equiposValidos (eJ:xs) 
+    | pertenece2 eJ xs = False
+    | otherwise = equiposValidos xs
+
+pertenece2 :: (String,String) -> [(String,String)] -> Bool
+pertenece2 _ [] = False
+pertenece2 (e1,j1) ((e2,j2):xs) | e1 == e2 || e1 == j2 = True
+                                | e2 == j1 || e2 == j2 = True
+                                | otherwise = pertenece2 (e1,j1) xs
+
+
+{--3) Porcentaje de Goles [3 puntos]
+
+problema porcentajeDeGoles (goleador: String, goleadoresPorEquipo: seq⟨String x String⟩, goles: seq⟨Z⟩): R {
+    requiere: {La segunda componente de algún elemento de goleadoresPorEquipo es goleador}
+    requiere: {equiposValidos(goleadoresPorEquipo)}
+    requiere: {|goleadoresPorEquipo| = |goles|}
+    requiere: {Todos los elementos de goles son mayores o iguales a 0}
+    requiere: {Hay al menos un elemento de goles mayor estricto a 0}
+    asegura: {res es el porcentaje de goles que marcó goleador sobre el total de goles convertidos por goleadores}
+}
+
+Se sugiere usar la funcion:
+division :: Int -> Int -> Float
+division n m = fromIntegral n / fromIntegral m--}
+
+porcentajeDeGoles :: String -> [(String,String)] -> [Integer] -> Float
+porcentajeDeGoles jugador goleadoresPorEquipo goles = division (calcularGolesJugador jugador goleadoresPorEquipo goles *100) ( contarGoles goles)
+
+
+calcularGolesJugador :: String -> [(String,String)] -> [Integer] -> Integer
+calcularGolesJugador jugador ((e1,j1):xs) (goles:gs)  
+  | jugador == j1 = goles
+  | otherwise = calcularGolesJugador jugador xs gs
+
+{--4) Botín de Oro [3 puntos]
+
+problema botinDeOro (goleadoresPorEquipo: seq⟨String x String⟩, goles: seq⟨Z⟩): String {
+    requiere: {equiposValidos(goleadoresPorEquipo)}
+    requiere: {|goleadoresPorEquipo| = |goles|}
+    requiere: {Todos los elementos de goles son mayores o iguales a 0}
+    requiere: {|goles| > 0}
+    asegura: {res es alguno de los goleadores de goleadoresPorEquipo que más tantos convirtió de acuerdo a goles}
+}
+--}
+
+botinDeOro :: [(String,String)] -> [Integer] -> String
+botinDeOro eqJuGs goles = devolverJugadorCon (maximo goles) eqJuGs goles
+
+
+devolverJugadorCon :: Integer -> [(String, String)] -> [Integer] -> String
+devolverJugadorCon x ((e,j):xs) (y:ys)
+    | x == y = j 
+    | otherwise = devolverJugadorCon x xs ys
