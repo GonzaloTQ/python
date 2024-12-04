@@ -1210,7 +1210,7 @@ def separar_en_digitos(numeros: list[int]) -> list[int]:
 
 # Ejercicio 3
 def reordenar_cola_primero_numerosas(carpetas: Cola[tuple[str,int]], umbral:int) -> Cola[tuple[str,int]]:
-    copia: Cola[tuple[str,int]] = copiar_cola(carpetas)
+    copia: Cola[tuple[str,int]] = copia_cola(carpetas)
     lista: list[tuple[str,int]] = []
     colamenores = Cola()
     colamayores = Cola()
@@ -1277,3 +1277,6 @@ def matriz_cuasi_decreciente(matriz: list[list[int]]) -> bool:
 a = [[1,2,3],[4,3,2],[5,4,2]]
 print(matriz_cuasi_decreciente(a))
 print(a)
+
+
+
