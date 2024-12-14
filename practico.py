@@ -151,7 +151,7 @@ def calcular(cuenta: str):
     return res
 
 
-#print (resolver_cuentas (crear_pila (["+2-4", "+7-5-2", "+1+6"])))
+print (resolver_cuentas (crear_pila (["+2-4", "+7-5-2", "+1+6"])))
 
 
 #4) Ejercicio 4 [2.25 puntos]
